@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<executable>
+  <category>HistomicsTK</category>
+  <title>PTC Segmentation</title>
+  <description>For segmenting peritubular capillaries in PAS-stained WSIs</description>
+  <version>0.1.0</version>
+  <documentation-url>https://digitalslidearchive.github.io/HistomicsTK/</documentation-url>
+  <license>Apache 2.0</license>
+  <contributor>Praveen Kumar Dande (UFL)</contributor>
+  <acknowledgements>This work is part of efforts in digital pathology by the Sarder Lab: UFL.</acknowledgements>
+  <parameters>
+    <label>IO</label>
+    <description>Input/output parameters.</description>
+    <image>
+      <name>input_files</name>
+      <label>Input Image/pattern</label>
+      <description>input filename </description>
+      <channel>input</channel>
+      <index>0</index>
+    </image>
+    <directory>
+      <name>base_dir</name>
+      <label>Base Directory</label>
+      <description>Base Directory for the image</description>
+      <channel>input</channel>
+      <index>1</index>
+    </directory>
+    <directory>
+      <name>model_dir</name>
+      <label>Model Directory</label>
+      <description>Base Directory for the image</description>
+      <channel>input</channel>
+      <index>1</index>
+    </directory>
+ 
+  </parameters>
+  <parameters advanced="true">
+    <label>Girder API URL and Key</label>
+    <description>A Girder API URL and token for Girder client</description>
+    <string>
+      <name>girderApiUrl</name>
+      <longflag>api-url</longflag>
+      <label>Girder API URL</label>
+      <description>A Girder API URL (e.g., https://girder.example.com:443/api/v1)</description>
+      <default></default>
+    </string>
+    <string>
+      <name>girderToken</name>
+      <longflag>token</longflag>
+      <label>Girder API Token</label>
+      <description>A Girder token</description>
+      <default></default>
+    </string>
+  </parameters>
+</executable>
