@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <executable>
   <category>HistomicsTK</category>
-  <title>PTC Segmentation</title>
+  <title>Kaggle Glomeruli Segmentation</title>
   <description>For segmenting peritubular capillaries in PAS-stained WSIs</description>
   <version>0.1.0</version>
   <documentation-url>https://digitalslidearchive.github.io/HistomicsTK/</documentation-url>
@@ -19,7 +19,7 @@
       <index>0</index>
     </image>
     <directory>
-      <name>base_dir</name>
+      <name>basedir</name>
       <label>Base Directory</label>
       <description>Base Directory for the image</description>
       <channel>input</channel>
@@ -28,11 +28,10 @@
     <directory>
       <name>model_dir</name>
       <label>Model Directory</label>
-      <description>Base Directory for the image</description>
+      <description>Choose model file</description>
       <channel>input</channel>
-      <index>1</index>
+      <index>2</index>
     </directory>
- 
   </parameters>
   <parameters advanced="true">
     <label>Girder API URL and Key</label>

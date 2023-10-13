@@ -41,12 +41,12 @@ def prerelease_local_scheme(version):
 setup(
     name='ptc',
     use_scm_version={'local_scheme': prerelease_local_scheme},
-    description='Plugin to segment PTC compartments from Kidney WSI',
+    description='Kaggle glomerulus segmentation',
     long_description=readme,
     long_description_content_type='text/x-rst',
     author='Computational Microscopy Imaging Laboratory, UF',
-    author_email='Sayat.Mimar@medicine.ufl.edu',
-    url='https://github.com/SarderLab/PTC_segmentation',
+    author_email='sayat.mimar@medicine.ufl.edu',
+    url='https://github.com/SarderLab/Kaggle_Glom_Segmentaion',
     packages=find_packages(exclude=['tests', '*_test']),
     package_dir={
         'kaggle': 'kaggle',
@@ -63,8 +63,8 @@ setup(
         'shapely[vectorized]',
         #'opencv-python-headless<4.7',
         #'sqlalchemy',
-        'matplotlib',
-        'pyvips',
+        # 'matplotlib',
+        # 'pyvips',
         'termcolor',
         'seaborn',
         'opencv-python',
@@ -77,8 +77,8 @@ setup(
         'tiffslide==1.5.0',
         'tqdm==4.64.0',
         'umap-learn==0.5.3',
-        'openpyxl',
-        'xlrd<2',
+        # 'openpyxl',
+        # 'xlrd<2',
         # dask packages
         'dask[dataframe]>=1.1.0',
         'distributed>=1.21.6',
@@ -96,8 +96,7 @@ setup(
         'nvidia-ml-py==11.515.48',
         'munch==2.5.0',
         'opencv-python-headless==4.6.0.66',
-        'rasterio==1.3.0'
-
+        'rasterio==1.3.0',
     ],
     license='Apache Software License 2.0',
     keywords='kaggle',

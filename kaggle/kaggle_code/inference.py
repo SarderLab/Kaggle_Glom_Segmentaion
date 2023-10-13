@@ -2,28 +2,28 @@
 DEBUG = False
 
 import numpy as np
-import pandas as pd
+# import pandas as pd
 from aicsimageio import AICSImage
 
-from aicsimageio.readers.ome_tiff_reader import OmeTiffReader
+# from aicsimageio.readers.ome_tiff_reader import OmeTiffReader
 from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
 
-from albumentations import (Compose, HorizontalFlip, VerticalFlip, Rotate, RandomRotate90,
-                            ShiftScaleRotate, ElasticTransform,
-                            GridDistortion, RandomSizedCrop, RandomCrop, CenterCrop,
-                            RandomBrightnessContrast, HueSaturationValue, IAASharpen,
-                            RandomGamma, RandomBrightness, RandomBrightnessContrast,
-                            GaussianBlur,CLAHE,
-                            Cutout, CoarseDropout, GaussNoise, ChannelShuffle, ToGray, OpticalDistortion,
-                            Normalize, OneOf, NoOp)
+from albumentations import (Compose, Normalize)#HorizontalFlip, VerticalFlip, Rotate, RandomRotate90,
+                            # ShiftScaleRotate, ElasticTransform,
+                            # GridDistortion, RandomSizedCrop, RandomCrop, CenterCrop,
+                            # RandomBrightnessContrast, HueSaturationValue, IAASharpen,
+                            # RandomGamma, RandomBrightness, RandomBrightnessContrast,
+                            # GaussianBlur,CLAHE,
+                            # Cutout, CoarseDropout, GaussNoise, ChannelShuffle, ToGray, OpticalDistortion,
+                            # Normalize, OneOf, NoOp)
 from albumentations.pytorch import ToTensorV2
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import girder_client
 import sys
 import os
 from os.path import join as opj
-import argparse
+# import argparse
 from pathlib import Path
 from typing import Iterable
 import random
@@ -35,12 +35,12 @@ import rasterio
 from rasterio.windows import Window
 import tifffile
 from skimage import measure
-
+from glob import glob
 import time
 from tqdm.notebook import tqdm
 
 import torch
-from torch import nn, optim
+from torch import nn#, optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
@@ -48,8 +48,10 @@ from torch.utils.data import DataLoader
 # package_dir = "/opt/pretrainedmodels/pretrained-models.pytorch-master/"
 #package_dir = r"C:\Users\dprav\OneDrive\Desktop\OPS\pas-ftu-segmentation-pipeline-main\pas-ftu-segmentation-pipeline-main\data\pretrainedmodels\pretrained-models.pytorch-master"
 package_dir = "./data/pretrainedmodels/pretrained-models.pytorch-master/"
-sys.path.insert(0, package_dir)
-import pretrainedmodels
+# sys.path.insert(0, package_dir)
+sys.path.append("..")
+from kaggle_code.data.pretrainedmodels.pretrained_models_pytorch_master import pretrainedmodels
+from kaggle_code.utils.annotation_converter import converter
 
 MEAN = np.array([0.485, 0.456, 0.406])
 STD = np.array([0.229, 0.224, 0.225])
@@ -725,11 +727,11 @@ def get_model_lists(config):
         LOAD_LOCAL_WEIGHT_PATH_LIST[seed] = []
         # LOAD_LOCAL_WEIGHT_PATH_LIST[seed].append(
         #         opj(config['model_path'], 'coat_lite_medium_384x384_f9129688.pth'))
-        for fold in config['FOLD_LIST']:
-            LOAD_LOCAL_WEIGHT_PATH_LIST[seed].append(
-                 opj(config['model_path'], f'model_seed{seed}_fold{fold}_bestscore.pth'))
+        #for fold in config['FOLD_LIST']:
+        LOAD_LOCAL_WEIGHT_PATH_LIST[seed].extend(
+        glob(config['model_path']+'/*.pth'))
             # LOAD_LOCAL_WEIGHT_PATH_LIST[seed].append(opj(config['model_path'],f'model_seed{seed}_fold{fold}_swa.pth'))
-
+    print(LOAD_LOCAL_WEIGHT_PATH_LIST,'here is the model')
     model_list = {}
     for seed in config['split_seed_list']:
         model_list[seed] = []
@@ -745,8 +747,8 @@ def get_model_lists(config):
     #             for name, param in model.state_dict().items():
                     # file.write(f"Name: {name}, Shape: {param.shape}\n")
                     
-            model.load_state_dict(torch.load(path,strict=False))
-            print("here")
+            model.load_state_dict(torch.load(path))
+       
             model.eval()
             model_list[seed].append(model)
             print("here")
@@ -787,6 +789,7 @@ class HuBMAPDataset(Dataset):
     def __init__(self, path, config):
         super().__init__()
         self.data = rasterio.open(path)
+        print('yes yes yes')
         if self.data.count != 3:
             subdatasets = self.data.subdatasets
             self.layers = []
@@ -808,7 +811,7 @@ class HuBMAPDataset(Dataset):
         return self.num_h * self.num_w
     
     def __getitem__(self, idx):
-        # idx = i_h * self.num_w + i_w
+        #idx = i_h * self.num_w + i_w
         # prepare coordinates for rasterio
         i_h = idx // self.num_w
         i_w = idx % self.num_w
@@ -825,7 +828,7 @@ class HuBMAPDataset(Dataset):
         img = np.zeros((self.sz,self.sz,3), np.uint8)
         
         # replace the value
-        if self.data.count == 3: 
+        if self.data.count == 3:
             img[0:qy1-qy0, 0:qx1-qx0] =\
                 np.moveaxis(self.data.read([1,2,3], window=Window.from_slices((qy0,qy1),(qx0,qx1))), 0,-1)
         else:
@@ -946,7 +949,7 @@ def mask2json(mask):
 
     return geojson_list
 
-def main(args, tissue_type:str):
+def predict(args, tissue_type:str):
 
     if tissue_type not in supported_tissue_types:
         raise ValueError(f"Type {tissue_type} not supported, only: {', '.join(supported_tissue_types)}")
@@ -957,22 +960,22 @@ def main(args, tissue_type:str):
     #image_paths = list(find_files(data_directory, file_template))
     #print(f"Found files: {image_paths}")
 
-    config = get_config()
+    config = get_config(args)
     print(f"Config generated")
-    print("before loaidng get model lists")
+    print("before loading get model lists")
     model_list = get_model_lists(config)
     print("after loading get model lists")
     image_paths = [args.input_files]
     for image_path in image_paths:
-        path_stem = image_path.stem
+        #path_stem = image_path.stem
         print("Before pred mask")
         pred_mask, h, w = get_pred_mask(image_path, model_list, config)
         print("afer pred mask")
 #        rle = get_rle(pred_mask, h, w, config)
-        OmeTiffWriter.save(pred_mask, f'{path_stem}_mask.ome.tif')
+        #OmeTiffWriter.save(pred_mask, f'{path_stem}_mask.ome.tif')
         json_mask = mask2json(pred_mask)
-        with open(f'{path_stem}_mask.json', 'w') as f:
-            json.dump(json_mask, f)
+        # with open(f'{path_stem}_mask.json', 'w') as f:
+        #     json.dump(json_mask, f)
         folder = args.basedir
         girder_folder_id = folder.split('/')[-2]    
         gc = girder_client.GirderClient(apiUrl=args.girderApiUrl)
@@ -985,23 +988,25 @@ def main(args, tissue_type:str):
             item_dict.update(d)
         print(item_dict)
         print(item_dict[file_name])
-        gc.uploadFileToItem(item_dict[file_name], f'{path_stem}_mask.json', reference=None, mimeType=None, filename="Annotation.json", progressCallback=None)
+        #gc.uploadFileToItem(item_dict[file_name], f'{path_stem}_mask.json', reference=None, mimeType=None, filename="Annotation.json", progressCallback=None)
+        _ = gc.post(path='annotation',parameters={'itemId':item_dict[file_name]}, data = json.dumps(converter(json_mask,['gloms'])[0]))
         print("done")
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--basedir')
-    parser.add_argument('--model_dir')
-    parser.add_argument('--input_files')
-    parser.add_argument('--girderApiUrl')
-    parser.add_argument('--girderToken')
-    args = parser.parse_args()
-    # args = p.parse_args()
 
-    # if args.enable_manhole:
-    #     import manhole
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--basedir')
+#     parser.add_argument('--model_dir')
+#     parser.add_argument('--input_files')
+#     parser.add_argument('--girderApiUrl')
+#     parser.add_argument('--girderToken')
+#     args = parser.parse_args()
+#     # args = p.parse_args()
 
-    #     manhole.install(activate_on="USR1")
+#     # if args.enable_manhole:
+#     #     import manhole
 
-    # main(args.data_directory, args.tissue_type)
-    print("begining")
-    main(args, 'RK')
+#     #     manhole.install(activate_on="USR1")
+
+#     # main(args.data_directory, args.tissue_type)
+#     print("begining")
+#     main(args, 'RK')

@@ -109,7 +109,7 @@ ENV build_path=$PWD/build
 # HistomicsTK sepcific
 
 # copy HistomicsTK files
-ENV kaggle_path=$PWD/kaggle
+ENV kaggle_path=$PWD/KGL
 RUN mkdir -p $kaggle_path
 
 RUN apt-get update && \
@@ -128,13 +128,10 @@ WORKDIR $kaggle_path
 
 RUN pip install --no-cache-dir --upgrade --ignore-installed pip setuptools && \
     pip install --no-cache-dir .  && \
-
     pip install --no-cache-dir tensorboard cmake onnx && \
-
     #pip install --no-cache-dir torch==1.10  torchaudio==0.10 torchvision==0.11.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html && \
     pip install --no-cache-dir torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html && \
     #pip install --no-cache-dir 'git+https://github.com/facebookresearch/fvcore' && \
-
     #git clone https://github.com/facebookresearch/detectron2 detectron2_repo && \
     #git clone https://github.com/facebookresearch/detectron2.git && \
     #python -m pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.10/index.html && \
@@ -160,7 +157,7 @@ RUN python --version && pip --version && pip freeze
 # RUN apt remove --purge cuda-compat-10-0 --yes
 
 # pregenerate font cache
-RUN python -c "from matplotlib import pylab"
+# RUN python -c "from matplotlib import pylab"
 
 # Suppress warnings
 # RUN sed -i 's/^_PRINT_DEPRECATION_WARNINGS = True/_PRINT_DEPRECATION_WARNINGS = False/g' /usr/local/lib/python3.8/dist-packages/tensorflow_core/python/util/deprecation.py && \
